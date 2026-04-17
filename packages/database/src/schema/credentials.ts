@@ -1,4 +1,4 @@
-import { jsonb, pgEnum, pgTable, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import { jsonb, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { authOrganization, authUser } from "./better-auth";
 
 export const schemaStatusEnum = pgEnum("schema_status", ["draft", "published", "archived"]);
@@ -9,43 +9,43 @@ export const presentationStatusEnum = pgEnum("presentation_status", ["verified",
 
 export const credentialSchemas = pgTable("credential_schemas", {
   id: uuid("id").defaultRandom().primaryKey(),
-  organizationId: varchar("organization_id", { length: 128 }).notNull().references(() => authOrganization.id),
-  name: varchar("name", { length: 255 }).notNull(),
-  version: varchar("version", { length: 64 }).notNull(),
-  schemaUri: varchar("schema_uri", { length: 2048 }).notNull(),
+  organizationId: text("organization_id").notNull().references(() => authOrganization.id),
+  name: text("name").notNull(),
+  version: text("version").notNull(),
+  schemaUri: text("schema_uri").notNull(),
   schemaJson: jsonb("schema_json").$type<Record<string, unknown>>().notNull(),
   status: schemaStatusEnum("status").notNull().default("draft"),
-  createdBy: varchar("created_by", { length: 128 }).notNull().references(() => authUser.id),
+  createdBy: text("created_by").notNull().references(() => authUser.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const credentialTemplates = pgTable("credential_templates", {
   id: uuid("id").defaultRandom().primaryKey(),
-  organizationId: varchar("organization_id", { length: 128 }).notNull().references(() => authOrganization.id),
+  organizationId: text("organization_id").notNull().references(() => authOrganization.id),
   schemaId: uuid("schema_id").notNull().references(() => credentialSchemas.id),
-  name: varchar("name", { length: 255 }).notNull(),
+  name: text("name").notNull(),
   templateJson: jsonb("template_json").$type<Record<string, unknown>>().notNull(),
   status: templateStatusEnum("status").notNull().default("draft"),
-  createdBy: varchar("created_by", { length: 128 }).notNull().references(() => authUser.id),
+  createdBy: text("created_by").notNull().references(() => authUser.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const credentialRecords = pgTable("credential_records", {
   id: uuid("id").defaultRandom().primaryKey(),
-  organizationId: varchar("organization_id", { length: 128 }).notNull().references(() => authOrganization.id),
+  organizationId: text("organization_id").notNull().references(() => authOrganization.id),
   templateId: uuid("template_id").references(() => credentialTemplates.id),
-  issuerDid: varchar("issuer_did", { length: 2048 }).notNull(),
-  subjectDid: varchar("subject_did", { length: 2048 }).notNull(),
-  credentialId: varchar("credential_id", { length: 2048 }).notNull(),
+  issuerDid: text("issuer_did").notNull(),
+  subjectDid: text("subject_did").notNull(),
+  credentialId: text("credential_id").notNull(),
   format: credentialFormatEnum("format").notNull(),
   status: credentialStatusEnum("status").notNull().default("issued"),
   credentialJson: jsonb("credential_json").$type<Record<string, unknown>>().notNull(),
   proofJson: jsonb("proof_json").$type<Record<string, unknown> | null>(),
   issuedAt: timestamp("issued_at", { withTimezone: true }).defaultNow().notNull(),
   revokedAt: timestamp("revoked_at", { withTimezone: true }),
-  createdBy: varchar("created_by", { length: 128 }).notNull().references(() => authUser.id),
+  createdBy: text("created_by").notNull().references(() => authUser.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   credentialIdUniqueIndex: uniqueIndex("credential_records_credential_id_unique").on(table.credentialId),
@@ -53,9 +53,9 @@ export const credentialRecords = pgTable("credential_records", {
 
 export const presentationRecords = pgTable("presentation_records", {
   id: uuid("id").defaultRandom().primaryKey(),
-  organizationId: varchar("organization_id", { length: 128 }).notNull().references(() => authOrganization.id),
-  verifierDid: varchar("verifier_did", { length: 2048 }).notNull(),
-  holderDid: varchar("holder_did", { length: 2048 }),
+  organizationId: text("organization_id").notNull().references(() => authOrganization.id),
+  verifierDid: text("verifier_did").notNull(),
+  holderDid: text("holder_did"),
   presentationJson: jsonb("presentation_json").$type<Record<string, unknown>>().notNull(),
   verificationResultJson: jsonb("verification_result_json").$type<Record<string, unknown>>().notNull(),
   status: presentationStatusEnum("status").notNull(),
