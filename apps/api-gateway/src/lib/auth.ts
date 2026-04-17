@@ -3,6 +3,16 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { organization } from "better-auth/plugins";
 import { createAccessControl } from "better-auth/plugins/access";
+import {
+  authAccount,
+  authApiKey,
+  authInvitation,
+  authMember,
+  authOrganization,
+  authSession,
+  authUser,
+  authVerification,
+} from "@vc-platform/database";
 import { permissionStatements } from "@vc-platform/types";
 import { env } from "../config/env";
 import { db } from "./db";
@@ -34,8 +44,19 @@ const adminRole = ac.newRole({
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_BASE_URL,
+  trustedOrigins: [env.WEB_PLATFORM_ORIGIN],
   database: drizzleAdapter(db, {
     provider: "pg",
+    schema: {
+      user: authUser,
+      session: authSession,
+      account: authAccount,
+      verification: authVerification,
+      organization: authOrganization,
+      member: authMember,
+      invitation: authInvitation,
+      apikey: authApiKey,
+    },
   }),
   emailAndPassword: {
     enabled: true,

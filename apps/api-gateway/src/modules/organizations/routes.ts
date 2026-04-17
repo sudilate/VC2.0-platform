@@ -43,6 +43,7 @@ const updateMemberRoleBodySchema = z.object({
 
 export interface OrganizationApi {
   createOrganization: typeof auth.api.createOrganization;
+  listOrganizations: typeof auth.api.listOrganizations;
   setActiveOrganization: typeof auth.api.setActiveOrganization;
   getFullOrganization: typeof auth.api.getFullOrganization;
   listMembers: typeof auth.api.listMembers;
@@ -84,6 +85,12 @@ export async function registerOrganizationRoutes(app: FastifyInstance, deps: Org
     });
 
     reply.code(201).send({ organization });
+  });
+
+  app.get("/v1/organizations", { preHandler: [sessionGuard] }, async (request) => {
+    return authApi.listOrganizations({
+      headers: fromNodeHeaders(request.headers),
+    });
   });
 
   app.post("/v1/organizations/active", { preHandler: [sessionGuard] }, async (request) => {

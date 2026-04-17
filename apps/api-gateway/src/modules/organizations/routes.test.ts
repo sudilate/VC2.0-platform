@@ -38,6 +38,22 @@ describe("organization routes", () => {
           slug: input.body.slug,
         };
       },
+      async listOrganizations() {
+        return {
+          organizations: [
+            {
+              id: "org_1",
+              name: "Acme",
+              slug: "acme",
+            },
+            {
+              id: "org_2",
+              name: "Globex",
+              slug: "globex",
+            },
+          ],
+        };
+      },
       async setActiveOrganization(input: { body: { organizationId?: string } }) {
         return {
           activeOrganizationId: input.body.organizationId,
@@ -110,6 +126,18 @@ describe("organization routes", () => {
     const body = response.json() as { members: Array<{ id: string }> };
     expect(body.members).toHaveLength(1);
     expect(body.members[0]?.id).toBe("member_1");
+  });
+
+  it("lists organizations for the signed-in user", async () => {
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/organizations",
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json() as { organizations: Array<{ id: string }> };
+    expect(body.organizations).toHaveLength(2);
+    expect(body.organizations[0]?.id).toBe("org_1");
   });
 
   it("creates invitation in active organization", async () => {

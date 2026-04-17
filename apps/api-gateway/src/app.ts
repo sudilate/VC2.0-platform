@@ -1,4 +1,5 @@
 import Fastify from "fastify";
+import cors from "@fastify/cors";
 import { env } from "./config/env";
 import { registerApiKeyRoutes } from "./modules/api-keys/routes";
 import { registerCredentialRoutes } from "./modules/credentials/routes";
@@ -13,6 +14,13 @@ export function createApp() {
     logger: {
       level: env.LOG_LEVEL,
     },
+  });
+
+  void app.register(cors, {
+    origin: [env.WEB_PLATFORM_ORIGIN],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   });
 
   app.get("/health", async () => ({

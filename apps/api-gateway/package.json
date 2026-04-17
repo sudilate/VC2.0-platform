@@ -10,6 +10,7 @@
     "test": "bun test"
   },
   "dependencies": {
+    "@fastify/cors": "latest",
     "@better-auth/api-key": "latest",
     "@vc-platform/database": "workspace:*",
     "@vc-platform/ledger-client": "workspace:*",

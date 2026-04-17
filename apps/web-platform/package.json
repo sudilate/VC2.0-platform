@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@vc-platform/types": "workspace:*",
+    "better-auth": "latest",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest"

@@ -1,6 +1,8 @@
 services:
   postgres:
     image: postgres:16-alpine
+    env_file:
+      - ../.env
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-vc_platform}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -17,6 +19,8 @@ services:
 
   openbao:
     image: openbao/openbao:latest
+    env_file:
+      - ../.env
     cap_add:
       - IPC_LOCK
     environment:
@@ -32,6 +36,8 @@ services:
 
   openbao-init:
     image: openbao/openbao:latest
+    env_file:
+      - ../.env
     depends_on:
       openbao:
         condition: service_healthy
