@@ -15,6 +15,20 @@
       "when": 1776408219588,
       "tag": "0001_striped_emma_frost",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1776410366510,
+      "tag": "0002_elite_revanche",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1776411366407,
+      "tag": "0003_fancy_cobalt_man",
+      "breakpoints": true
     }
   ]
 }

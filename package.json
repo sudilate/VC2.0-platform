@@ -14,6 +14,7 @@
     "test": "turbo run test",
     "db:generate": "bunx --bun drizzle-kit generate --config packages/database/drizzle.config.ts",
     "db:migrate": "bunx --bun drizzle-kit migrate --config packages/database/drizzle.config.ts",
+    "db:studio": "bunx --bun drizzle-kit studio --config packages/database/drizzle.config.ts",
     "docker:up": "docker compose -f docker/docker-compose.yml up -d",
     "docker:down": "docker compose -f docker/docker-compose.yml down"
   },

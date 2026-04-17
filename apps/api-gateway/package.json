@@ -16,10 +16,12 @@
     "@vc-platform/types": "workspace:*",
     "better-auth": "latest",
     "dotenv": "latest",
+    "drizzle-orm": "latest",
     "fastify": "latest",
     "zod": "latest"
   },
   "devDependencies": {
+    "@types/bun": "latest",
     "typescript": "latest"
   }
 }
