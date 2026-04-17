@@ -1,0 +1,87 @@
+
+ """# Enterprise Verifiable Credentials (VC 2.0) Platform
+## Architectural Blueprint & Implementation Plan
+
+### 1. Executive Summary
+This document outlines the technical architecture and implementation strategy for a production-ready Verifiable Credentials (VC 2.0) platform. The system is designed to provide a developer-facing SDK/API, an Enterprise Dashboard for Issuers and Verifiers, and a Consumer Web Wallet. 
+
+The architecture prioritizes raw performance, cryptographic integrity, and data privacy (Zero-Knowledge Proofs, Selective Disclosure), while ensuring a seamless developer experience (DX) and scalable, high-volume operations.
+
+---
+
+### 2. High-Level System Architecture
+
+The platform utilizes a modern, decoupled, event-driven microservices architecture managed within a monorepo.
+
+* **API Gateway & Core Orchestration:** `Bun` + `Fastify`. Serves as the high-performance entry point for all REST/WS traffic, handling workflow orchestration and SDK requests.
+* **Cryptographic Engine:** `Rust` (Standalone gRPC Service). Offloads heavy cryptographic tasks (BBS+ ZKPs, SD-JWTs, Ed25519 signatures) from the main API loop to ensure independent scalability.
+* **Database Layer:** `PostgreSQL`. Stores structured relational data (users, organizations) and flexible JSONB documents (VC templates, schemas).
+* **ORM & Type Safety:** `Drizzle ORM`. Provides end-to-end type safety across the database, API, and frontend.
+* **Authentication & Multi-Tenancy:** `better-auth`. Manages Web2 OIDC/OAuth, Role-Based Access Control (RBAC), and multi-tenant Organization hierarchies.
+* **Key Management System (KMS):** `OpenBao`. An open-source, Vault-compatible KMS for securely storing and managing Issuer private keys.
+* **Frontend Ecosystem:** `Next.js` (App Router) + `Shadcn UI`. Hosts the unified Web Platform encompassing the Enterprise Dashboard, Verifier Portal, and Consumer Wallet.
+
+---
+
+### 3. Monorepo Project Structure
+
+```text
+vc-platform-monorepo/
+├── apps/
+│   ├── web-platform/         # Next.js: Issuer, Verifier, and Wallet UIs
+│   ├── api-gateway/          # Bun/Fastify: Core logic, REST/WS server
+│   └── crypto-engine/        # Rust gRPC: Cryptographic microservice
+├── packages/
+│   ├── vc-sdk/               # TypeScript SDK for external consumption
+│   ├── database/             # Postgres schemas, Drizzle configs, migrations
+│   ├── ledger-client/        # DID resolution (web, key, cord) & schema fetching
+│   ├── ui-kit/               # Shared React components (Shadcn UI, Tailwind)
+│   └── types/                # Shared TS definitions (VC 2.0 data models, Protobuf types)
+├── docker/
+│   ├── docker-compose.yml    # Local orchestration (Postgres, OpenBao, gRPC, API)
+│   └── openbao/              # KMS configuration and initialization scripts
+├── turbo.json                # Turborepo pipeline configuration
+└── package.json
+
+
+4. Detailed Implementation Phases
+Phase 1: Infrastructure & Data Modeling
+Establish the foundational structure, tooling, and database schemas.
+Monorepo Initialization: Configure Turborepo for workspace management, shared linting, and build pipelines.
+Database & ORM Setup: * Initialize PostgreSQL container.
+Define Drizzle ORM schemas in the packages/database module.
+Create tables for Organizations, Users, API_Keys, Schema_Registries, and Credential_Records (utilizing JSONB for flexible VC metadata).
+KMS Integration: Deploy OpenBao via Docker Compose. Establish the transit secrets engine and write setup scripts to initialize development keys.
+Phase 2: Identity, Access, & Multi-Tenancy
+Implement the authorization boundaries using better-auth.
+Organization Management: Configure the better-auth Organization plugin to support multi-tenancy. Define Roles (Admin, Issuer, Verifier) and Permissions.
+Dashboard AuthN: Implement standard OIDC/OAuth login flows for enterprise users accessing the web platform.
+SDK AuthZ: Develop API Key generation and validation logic for external developers consuming the Fastify gateway.
+Phase 3: Cryptographic gRPC Engine (Rust)
+Isolate CPU-intensive cryptographic operations into a highly scalable Rust microservice.
+Protocol Buffer Definition: Create .proto contracts defining RPC calls such as SignCredential, VerifyPresentation, and DeriveProof.
+OpenBao Client: Integrate vault.rs (compatible with OpenBao) to securely retrieve and utilize private keys for signing operations without exposing them to the API gateway.
+VC 2.0 Primitives: Implement core cryptographic suites:
+Standard Ed25519Signature2020 for foundational testing.
+SD-JWT implementations for Selective Disclosure capabilities.
+(Future) BBS+ signatures for advanced Zero-Knowledge Proofs.
+Phase 4: High-Performance API Gateway (Bun)
+Build the core business logic layer and routing.
+DID Resolver Middleware: Implement a routing interface for Decentralized Identifiers.
+Initial support: did:key (offline) and did:web (HTTP-based).
+Adapter pattern established for future enterprise ledger anchoring (e.g., did:cord).
+Schema Fetcher Pipeline: Build a hybrid caching system that fetches JSON Draft 2020-12 schemas from both local/hosted endpoints and distributed public registries, caching them in PostgreSQL/Memory to optimize verification speed.
+Core Issuance/Verification Routes: Develop Fastify endpoints that intake draft credentials, validate against schemas, communicate with the Rust gRPC service for signing, and return fully formed VC 2.0 documents.
+Real-time Event Bus: Implement Server-Sent Events (SSE) in Fastify to push lifecycle updates (e.g., "Presentation Verified") to the frontend seamlessly.
+Phase 5: Web Platform & SDK Ecosystem
+Deliver the user-facing interfaces and developer tools.
+Enterprise Dashboard (Next.js): Build schema-driven UI forms using Shadcn UI allowing authorized Organization members to draft schemas, define credential templates, and issue VCs.
+Consumer Web Wallet (Next.js): Develop a responsive interface for users to receive VCs, view claims, and generate Verifiable Presentations using Selective Disclosure (choosing exactly which fields to reveal).
+TypeScript SDK: Finalize the packages/vc-sdk wrapper, exposing typed methods (import { VcClient } from '@acme/vc-sdk') for external developers to easily interface with the API Gateway.
+Phase 6: Productionization & High-Volume Scale
+Ensure the system is ready for enterprise load and deployment.
+Bitstring Status Lists: Implement VC 2.0 highly scalable revocation mechanisms. Generate and host cryptographically signed bitstrings so verifiers can check revocation status locally without pinging the API for every request.
+Deployment Configuration: Configure Docker buildx pipelines to ensure seamless cross-compilation from local Apple Silicon (arm64) environments to production cloud instances (amd64).
+Observability: Integrate distributed tracing (OpenTelemetry) across the Bun API Gateway and Rust gRPC service to monitor latency and cryptographic bottlenecks.
+"""
+

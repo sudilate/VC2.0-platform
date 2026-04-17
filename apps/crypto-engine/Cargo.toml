@@ -1,0 +1,12 @@
+[package]
+name = "crypto-engine"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+prost = "0.13"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+tonic = { version = "0.12", features = ["transport"] }
+
+[build-dependencies]
+tonic-build = "0.12"

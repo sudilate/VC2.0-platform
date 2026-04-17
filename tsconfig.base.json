@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "ignoreDeprecations": "6.0",
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "@vc-platform/types": [
+        "packages/types/src"
+      ],
+      "@vc-platform/database": [
+        "packages/database/src"
+      ],
+      "@vc-platform/ledger-client": [
+        "packages/ledger-client/src"
+      ],
+      "@vc-platform/ui-kit": [
+        "packages/ui-kit/src"
+      ],
+      "@vc-platform/vc-sdk": [
+        "packages/vc-sdk/src"
+      ]
+    }
+  }
+}

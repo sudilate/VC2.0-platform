@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package vcplatform.crypto.v1;
+
+service CryptoEngine {
+  rpc SignCredential (SignCredentialRequest) returns (SignCredentialResponse);
+  rpc VerifyCredential (VerifyCredentialRequest) returns (VerifyCredentialResponse);
+  rpc VerifyPresentation (VerifyPresentationRequest) returns (VerifyPresentationResponse);
+}
+
+message SignCredentialRequest {
+  string organization_id = 1;
+  string environment = 2;
+  string key_ref = 3;
+  string issuer_did = 4;
+  string credential_payload_json = 5;
+  string signature_suite = 6;
+}
+
+message SignCredentialResponse {
+  bool success = 1;
+  string signed_credential_json = 2;
+  repeated string errors = 3;
+}
+
+message VerifyCredentialRequest {
+  string organization_id = 1;
+  string environment = 2;
+  string verification_input_json = 3;
+}
+
+message VerifyCredentialResponse {
+  bool success = 1;
+  string verification_result_json = 2;
+  repeated string errors = 3;
+}
+
+message VerifyPresentationRequest {
+  string organization_id = 1;
+  string environment = 2;
+  string verification_input_json = 3;
+}
+
+message VerifyPresentationResponse {
+  bool success = 1;
+  string verification_result_json = 2;
+  repeated string errors = 3;
+}
