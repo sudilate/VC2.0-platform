@@ -9,7 +9,7 @@ import {
   requireActiveOrganization,
   requireSession,
 } from "../../plugins/guards";
-import { requireOrganizationPermission } from "../../plugins/permissions";
+import { requireOrganizationPermission, type PermissionMap } from "../../plugins/permissions";
 
 const createTemplateBody = z.object({
   schemaId: z.string().uuid(),
@@ -98,7 +98,7 @@ export interface TemplateRouteDependencies {
   permissionChecker?: (
     request: FastifyRequest,
     reply: FastifyReply,
-    permissions: Parameters<typeof requireOrganizationPermission>[2],
+    permissions: PermissionMap,
   ) => Promise<boolean>;
 }
 

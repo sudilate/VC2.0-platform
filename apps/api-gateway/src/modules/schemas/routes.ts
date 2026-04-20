@@ -9,7 +9,7 @@ import {
   requireActiveOrganization,
   requireSession,
 } from "../../plugins/guards";
-import { requireOrganizationPermission } from "../../plugins/permissions";
+import { requireOrganizationPermission, type PermissionMap } from "../../plugins/permissions";
 
 const createSchemaBody = z.object({
   name: z.string().min(2).max(255),
@@ -105,7 +105,7 @@ export interface SchemaRouteDependencies {
   permissionChecker?: (
     request: FastifyRequest,
     reply: FastifyReply,
-    permissions: Parameters<typeof requireOrganizationPermission>[2],
+    permissions: PermissionMap,
   ) => Promise<boolean>;
 }
 

@@ -21,6 +21,10 @@ function NavLink({ href, label, active }: { href: string; label: string; active:
   );
 }
 
+function SectionTitle({ label }: { label: string }) {
+  return <span style={{ color: "#98a2b3", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</span>;
+}
+
 export default function ProtectedAppLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -46,22 +50,10 @@ export default function ProtectedAppLayout({ children }: { children: ReactNode }
 
   return (
     <div style={{ minHeight: "100vh" }}>
-      <header
-        style={{
-          borderBottom: "1px solid #e4e7ec",
-          background: "#fff",
-          position: "sticky",
-          top: 0,
-          zIndex: 20,
-        }}
-      >
-        <div style={{ maxWidth: "1080px", margin: "0 auto", padding: "0.85rem 1rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
+      <header style={{ borderBottom: "1px solid #e4e7ec", background: "#fff", position: "sticky", top: 0, zIndex: 20 }}>
+        <div style={{ maxWidth: "1180px", margin: "0 auto", padding: "0.85rem 1rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
             <strong>VC Platform</strong>
-            <nav style={{ display: "flex", gap: "0.9rem" }}>
-              <NavLink href="/app" label="Overview" active={pathname === "/app"} />
-              <NavLink href="/app/organization" label="Organization" active={pathname.startsWith("/app/organization")} />
-            </nav>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <span style={{ color: "#475467", fontSize: 14 }}>{session.user.email}</span>
@@ -76,7 +68,31 @@ export default function ProtectedAppLayout({ children }: { children: ReactNode }
           </div>
         </div>
       </header>
-      <main style={{ maxWidth: "1080px", margin: "0 auto", padding: "1.2rem 1rem 2rem" }}>{children}</main>
+      <div style={{ maxWidth: "1180px", margin: "0 auto", padding: "1.2rem 1rem 2rem", display: "grid", gridTemplateColumns: "220px minmax(0, 1fr)", gap: "1.25rem" }}>
+        <aside style={{ alignSelf: "start", position: "sticky", top: 76 }}>
+          <div style={{ border: "1px solid #e4e7ec", borderRadius: 12, background: "#fff", padding: "1rem", display: "grid", gap: "0.75rem" }}>
+            <SectionTitle label="Workspace" />
+            <nav style={{ display: "grid", gap: "0.55rem" }}>
+              <NavLink href="/app" label="Overview" active={pathname === "/app"} />
+              <NavLink href="/app/organization" label="Organization" active={pathname.startsWith("/app/organization")} />
+              <NavLink href="/app/invitations" label="Invitations" active={pathname.startsWith("/app/invitations")} />
+            </nav>
+            <SectionTitle label="Operations" />
+            <nav style={{ display: "grid", gap: "0.55rem" }}>
+              <NavLink href="/app/issue" label="Issue Credential" active={pathname.startsWith("/app/issue")} />
+              <NavLink href="/app/verify" label="Verify Credential" active={pathname.startsWith("/app/verify")} />
+              <NavLink href="/app/schemas" label="Schemas" active={pathname.startsWith("/app/schemas")} />
+              <NavLink href="/app/templates" label="Templates" active={pathname.startsWith("/app/templates")} />
+            </nav>
+            <SectionTitle label="Settings" />
+            <nav style={{ display: "grid", gap: "0.55rem" }}>
+              <NavLink href="/app/settings/members" label="Members" active={pathname.startsWith("/app/settings/members")} />
+              <NavLink href="/app/settings/api-keys" label="API Keys" active={pathname.startsWith("/app/settings/api-keys")} />
+            </nav>
+          </div>
+        </aside>
+        <main>{children}</main>
+      </div>
     </div>
   );
 }

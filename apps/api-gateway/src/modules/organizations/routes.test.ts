@@ -67,6 +67,21 @@ describe("organization routes", () => {
           members: [],
         };
       },
+      async listUserInvitations() {
+        return [
+          {
+            id: "invite_1",
+            email: "user@example.com",
+            role: "issuer",
+            organizationId: "org_1",
+            organizationName: "Acme",
+            inviterId: "user_1",
+            status: "pending",
+            expiresAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+          },
+        ];
+      },
       async listMembers() {
         return {
           members: [
@@ -93,6 +108,25 @@ describe("organization routes", () => {
           role: input.body.role,
           organizationId: input.body.organizationId,
           status: "pending",
+        };
+      },
+      async acceptInvitation(input: { body: { invitationId: string } }) {
+        return {
+          invitation: {
+            id: input.body.invitationId,
+          },
+          member: {
+            id: "member_2",
+            role: "issuer",
+          },
+        };
+      },
+      async rejectInvitation(input: { body: { invitationId: string } }) {
+        return {
+          invitation: {
+            id: input.body.invitationId,
+          },
+          member: null,
         };
       },
       async updateMemberRole(input: { body: { memberId: string; role: string } }) {
@@ -154,6 +188,40 @@ describe("organization routes", () => {
     const body = response.json() as { organizationId: string; email: string };
     expect(body.organizationId).toBe("org_1");
     expect(body.email).toBe("issuer@example.com");
+  });
+
+  it("lists pending invitations for the signed-in user", async () => {
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/invitations",
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json() as { invitations: Array<{ id: string }> };
+    expect(body.invitations).toHaveLength(1);
+    expect(body.invitations[0]?.id).toBe("invite_1");
+  });
+
+  it("accepts a pending invitation", async () => {
+    const response = await app.inject({
+      method: "POST",
+      url: "/v1/invitations/invite_1/accept",
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json() as { invitation: { id: string } };
+    expect(body.invitation.id).toBe("invite_1");
+  });
+
+  it("rejects a pending invitation", async () => {
+    const response = await app.inject({
+      method: "POST",
+      url: "/v1/invitations/invite_1/reject",
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json() as { invitation: { id: string } };
+    expect(body.invitation.id).toBe("invite_1");
   });
 
   it("updates member role in active organization", async () => {

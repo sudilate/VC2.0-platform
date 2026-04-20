@@ -17,23 +17,48 @@ import { permissionStatements } from "@vc-platform/types";
 import { env } from "../config/env";
 import { db } from "./db";
 
-const ac = createAccessControl(permissionStatements);
+const organizationStatements = {
+  organization: ["update", "delete"],
+  member: ["create", "update", "delete"],
+  invitation: ["create", "cancel"],
+  team: ["create", "update", "delete"],
+  ac: ["create", "read", "update", "delete"],
+} as const;
+
+const ac = createAccessControl({
+  ...permissionStatements,
+  ...organizationStatements,
+});
 
 const issuerRole = ac.newRole({
-  organization: ["read"],
   schema: ["create", "read"],
   template: ["create", "read"],
   credential: ["issue", "read"],
 });
 
 const verifierRole = ac.newRole({
-  organization: ["read"],
   presentation: ["verify"],
 });
 
 const adminRole = ac.newRole({
-  organization: ["read"],
-  member: ["invite", "update"],
+  organization: ["update", "delete"],
+  member: ["create", "update", "delete"],
+  invitation: ["create", "cancel"],
+  team: ["create", "update", "delete"],
+  ac: ["create", "read", "update", "delete"],
+  schema: ["create", "read"],
+  template: ["create", "read"],
+  credential: ["issue", "read"],
+  presentation: ["verify"],
+  apiKey: ["create", "read", "revoke"],
+});
+
+const ownerRole = ac.newRole({
+  organization: ["update", "delete"],
+  member: ["create", "update", "delete"],
+  invitation: ["create", "cancel"],
+  team: ["create", "update", "delete"],
+  ac: ["create", "read", "update", "delete"],
   schema: ["create", "read"],
   template: ["create", "read"],
   credential: ["issue", "read"],
@@ -65,6 +90,7 @@ export const auth = betterAuth({
     organization({
       ac,
       roles: {
+        owner: ownerRole,
         admin: adminRole,
         issuer: issuerRole,
         verifier: verifierRole,

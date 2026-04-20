@@ -1,11 +1,8 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { FastifyReply, FastifyRequest } from "fastify";
-import type { permissionStatements } from "@vc-platform/types";
 import { auth } from "../lib/auth";
 
-type PermissionMap = Partial<{
-  [Resource in keyof typeof permissionStatements]: Array<(typeof permissionStatements)[Resource][number]>;
-}>;
+export type PermissionMap = Partial<Record<string, string[]>>;
 
 export async function requireOrganizationPermission(
   request: FastifyRequest,
@@ -16,7 +13,7 @@ export async function requireOrganizationPermission(
     const result = await auth.api.hasPermission({
       headers: fromNodeHeaders(request.headers),
       body: {
-        permissions,
+        permissions: permissions as any,
       },
     });
 

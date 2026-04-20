@@ -10,6 +10,8 @@
     "test": "bun test"
   },
   "dependencies": {
+    "@grpc/grpc-js": "latest",
+    "@grpc/proto-loader": "latest",
     "@fastify/cors": "latest",
     "@better-auth/api-key": "latest",
     "@vc-platform/database": "workspace:*",

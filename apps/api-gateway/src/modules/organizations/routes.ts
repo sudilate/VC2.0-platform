@@ -8,7 +8,7 @@ import {
   requireActiveOrganization,
   requireSession,
 } from "../../plugins/guards";
-import { requireOrganizationPermission } from "../../plugins/permissions";
+import { requireOrganizationPermission, type PermissionMap } from "../../plugins/permissions";
 
 const createOrganizationSchema = z.object({
   name: z.string().min(2).max(120),
@@ -41,13 +41,20 @@ const updateMemberRoleBodySchema = z.object({
   role: z.enum(["admin", "issuer", "verifier"]),
 });
 
+const invitationParamsSchema = z.object({
+  invitationId: z.string().min(1),
+});
+
 export interface OrganizationApi {
   createOrganization: typeof auth.api.createOrganization;
   listOrganizations: typeof auth.api.listOrganizations;
   setActiveOrganization: typeof auth.api.setActiveOrganization;
   getFullOrganization: typeof auth.api.getFullOrganization;
   listMembers: typeof auth.api.listMembers;
+  listUserInvitations: typeof auth.api.listUserInvitations;
   createInvitation: typeof auth.api.createInvitation;
+  acceptInvitation: typeof auth.api.acceptInvitation;
+  rejectInvitation: typeof auth.api.rejectInvitation;
   updateMemberRole: typeof auth.api.updateMemberRole;
 }
 
@@ -58,7 +65,7 @@ export interface OrganizationRouteDependencies {
   permissionChecker?: (
     request: FastifyRequest,
     reply: FastifyReply,
-    permissions: Parameters<typeof requireOrganizationPermission>[2],
+    permissions: PermissionMap,
   ) => Promise<boolean>;
 }
 
@@ -119,8 +126,16 @@ export async function registerOrganizationRoutes(app: FastifyInstance, deps: Org
     return { activeOrganization };
   });
 
+  app.get("/v1/invitations", { preHandler: [sessionGuard] }, async (request) => {
+    const invitations = await authApi.listUserInvitations({
+      headers: fromNodeHeaders(request.headers),
+    });
+
+    return { invitations };
+  });
+
   app.get("/v1/organizations/active/members", { preHandler: [sessionGuard, activeOrganizationGuard] }, async (request, reply) => {
-    const allowed = await permissionChecker(request, reply, { organization: ["read"] });
+    const allowed = await permissionChecker(request, reply, { member: ["update"] });
     if (!allowed) {
       return;
     }
@@ -143,7 +158,7 @@ export async function registerOrganizationRoutes(app: FastifyInstance, deps: Org
   });
 
   app.post("/v1/organizations/active/invitations", { preHandler: [sessionGuard, activeOrganizationGuard] }, async (request, reply) => {
-    const allowed = await permissionChecker(request, reply, { member: ["invite"] });
+    const allowed = await permissionChecker(request, reply, { invitation: ["create"] });
     if (!allowed) {
       return;
     }
@@ -161,6 +176,28 @@ export async function registerOrganizationRoutes(app: FastifyInstance, deps: Org
     });
 
     reply.code(201).send(invitation);
+  });
+
+  app.post("/v1/invitations/:invitationId/accept", { preHandler: [sessionGuard] }, async (request) => {
+    const params = invitationParamsSchema.parse(request.params);
+
+    return authApi.acceptInvitation({
+      headers: fromNodeHeaders(request.headers),
+      body: {
+        invitationId: params.invitationId,
+      },
+    });
+  });
+
+  app.post("/v1/invitations/:invitationId/reject", { preHandler: [sessionGuard] }, async (request) => {
+    const params = invitationParamsSchema.parse(request.params);
+
+    return authApi.rejectInvitation({
+      headers: fromNodeHeaders(request.headers),
+      body: {
+        invitationId: params.invitationId,
+      },
+    });
   });
 
   app.patch("/v1/organizations/active/members/:memberId", { preHandler: [sessionGuard, activeOrganizationGuard] }, async (request, reply) => {
